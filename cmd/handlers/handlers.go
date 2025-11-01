@@ -1,29 +1,46 @@
 package handlers
 
 import (
-	"log"
-	"net/http"
 	"html/template"
 	"io"
+	"log"
+	"net/http"
+	"os"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"Messanger/internal/websocket"
 	"Messanger/internal/database"
 	"Messanger/internal/mail"
+	"Messanger/internal/websocket"
+
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Template struct{
-	templates *template.Template
+	templates *template.Template // Структура для шаблонов
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error{
-	return t.templates.ExecuteTemplate(w, name, data) // Рендер шаблонов 
+	return t.templates.ExecuteTemplate(w, name, data) // Метод для рендера шаблонов 
+}
+
+func MiddlewareSessions(next echo.HandlerFunc) echo.HandlerFunc{ // Создаем Middleware для сессии
+	return func(c echo.Context) error{
+		var store = sessions.NewCookieStore([]byte(os.Getenv("SECRET_KEY")))
+		// store.Options = &sessions.Options{
+		// 	HttpOnly: true,
+
+		// }
+		session, _ := store.Get(c.Request(), "genesis-auth")
+		c.Set("session", session)
+		return next(c)
+	}	
 }
 
 func HandleRequests(){
 	e := echo.New()
 	
+	e.Use(MiddlewareSessions)
 	e.Use(middleware.Logger()) // Middleware
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -31,7 +48,7 @@ func HandleRequests(){
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete}, // CORS для разрешения с браузера 
 	}))
 	
-	e.Static("/web/static", "web/static") // Создаем для статических файлов CSS (красивые штучки:))))
+	e.Static("/web/static", "web/static") // Создаем для статических файлов CSS
 
 	templates, err := template.ParseFiles( // Обработка HTML-файлов (ну тупо страниц)
 		"web/templates/footer.html",
@@ -40,23 +57,20 @@ func HandleRequests(){
 		"web/templates/channels_page.html",
 		"web/templates/checking_code.html",
 		"web/templates/side_bar.html",
-	    "web/templates/main_page.html",
 	    "web/templates/auth_page.html",
 	    "web/templates/home_page.html",
 		"web/templates/about_page.html",
 		"web/templates/reg_page2.html",
 		"web/templates/reg_page.html",
-	)
-	if err != nil {
-		log.Fatalf("Ошибка загрузки шаблонов: %v", err)
-	}
+	); 
+	if err != nil {log.Fatalf("Ошибка загрузки шаблонов:%v", err)}
+	
 	e.Renderer = &Template{templates: templates} // Рендер шаблонов 
 
 	e.GET("/", func(c echo.Context) error {
 		return c.Redirect(http.StatusPermanentRedirect, "/auth")
 	})
 
-	e.GET("/main", mainPage)
 	e.GET("/home", homePage)
 	e.GET("/channs", channelsPage)
 	e.GET("/about", aboutPage)
@@ -71,8 +85,8 @@ func HandleRequests(){
 	e.GET("/reg2", showRegPage2)
 	e.POST("/reg2/post", mail.SendWithGomail)
 
-	e.POST("/checkingcode/post", mail.CheckCode)
 	e.GET("/checkingcode", showCheckCode)
+	e.POST("/checkingcode/post", mail.CheckCode)
 	
 	e.GET("/ws", func(c echo.Context) error {
 		websocket.HandleConnections(c.Response(), c.Request())
@@ -87,12 +101,6 @@ func HandleRequests(){
 func homePage(c echo.Context) error{ 
 	return c.Render(http.StatusOK, "home_page", map[string]interface{}{
 		"Title": "Home page",
-	})
-}
-// Главная страница
-func mainPage(c echo.Context) error{ 
-	return c.Render(http.StatusOK, "main_page", map[string]interface{}{
-		"Title": "Main page",
 	})
 }
 // Страница о самом Месседжере
