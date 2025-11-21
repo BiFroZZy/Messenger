@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"context"
-	"strconv"
+	_"strconv"
 	"fmt"
 
 	"github.com/jackc/pgx/v4"
@@ -27,8 +27,9 @@ func InitDB(){
 	}
 	_, err = conn.Exec(context.Background(), `
         CREATE TABLE IF NOT EXISTS data_user (
-            username VARCHAR(50) UNIQUE NOT NULL,
-            password INT NOT NULL
+			ID SERIAL PRIMARY KEY,
+            username VARCHAR(50),
+            password VARCHAR(50)
         )
     `)
 	if err != nil{
@@ -50,12 +51,6 @@ func RegPage(c echo.Context) error {
 	)
 	getUsernameReg := c.FormValue("usernameReg")
 	getPasswordReg := c.FormValue("passwordReg")
-	if _, err := strconv.Atoi(getPasswordReg); err != nil {
-        return c.Render(http.StatusOK, "registration", map[string]interface{}{
-            "Title": "Registration",
-            "Error": "Password must contain only numbers",
-        })
-    }
 	// Проверка инфы с базы даннных 
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{
@@ -74,15 +69,15 @@ func RegPage(c echo.Context) error {
 	defer rows.Close()
 	var (
 		username string
-		password int
+		password string
 	)
 	for rows.Next(){
 		err := rows.Scan(&username, &password)
 		if err != nil{
 			log.Fatal(err)
 		}
-		stringPassword := strconv.Itoa(password)
-		if getUsernameReg == username || getPasswordReg == stringPassword{
+		
+		if getUsernameReg == username || getPasswordReg == password{
 			data := struct{Error string}{Error: "Password or login already exists"}
 			return c.Render(http.StatusOK, "registration", data)
 		}
@@ -122,7 +117,7 @@ func AuthPage(c echo.Context) error{
 
 	var (
 		username string
-		password int
+		password string
 	)
 	
 	for rows.Next(){
@@ -133,8 +128,7 @@ func AuthPage(c echo.Context) error{
         		"Error": "Wrong password or login",
 			})
 		}
-		stringPassword := strconv.Itoa(password)
-		if getUsernameAuth == username && getPasswordAuth == stringPassword{
+		if getUsernameAuth == username && getPasswordAuth == password{
 			return c.Redirect(http.StatusFound, "/home")
 		}
 	}
@@ -162,6 +156,6 @@ func WriteSQL(username, password string) {
 	_, err = conn.Exec(context.Background(), "INSERT INTO data_user (username, password) VALUES ($1, $2)", username, password) 
 	if err != nil{
 		log.Fatal(err)
-		// log.Printf("Error:", err)
+
 	}
 }

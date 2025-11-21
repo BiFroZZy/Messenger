@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"context"
-	_"fmt"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -40,7 +39,7 @@ var (
 	broadcast  = make(chan Message, 100) // Общий канал 
 
 	redisClient *redis.Client
-	maxMessages int64 = 250
+	maxMessages int64 = 250 // Максимальное количество сообщений, которое можно сохранить в Redis 
 )
 // Инициальзация Redis через переменные окружения 
 func init(){
