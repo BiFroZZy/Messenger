@@ -1,4 +1,4 @@
-# version: '3.8'
+version: '3.8'
 networks:
   internal:
 services:
@@ -9,9 +9,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy # ждет когда нормализуется база данных
+      redis: 
+        condition: service_healthy # ждет когда нормализуется redis
     environment:
-      DATABASE_URL: postgres://postgres:Roflan_2006@postgres:5432/data
+      # DATABASE_URL: postgres://postgres:Roflan_2006@postgres:5432/data
+      DATABASE_URL: postgres://${USER}:${PASSWORD}@${HOST}:${PORT}/data
       HOST: 0.0.0.0
+    env_file:
+      - .env
     restart: unless-stopped
     networks:
       - internal
@@ -25,16 +30,33 @@ services:
       ports:
         - "0.0.0.0:5433:5432"
       volumes:
-        - postgres_data:/var/lib/postgresql/data
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql  
-      healthcheck:  # healthcheck
+        - postgres_data:/var/lib/postgresql/data  
+      healthcheck:  
         test: ["CMD-SHELL", "pg_isready -U postgres -d data"]
         interval: 5s
         timeout: 5s
         retries: 10
       networks:
         - internal
+  redis:
+      image: redis:latest
+      container_name: redis
+      environment:
+        - REDIS_PASSWORD=""
+        - REDIS_HOST=redis
+        - REDIS_PORT=6379
+      ports: 
+        - "6379:6379"
+      volumes:
+        - redis_data:/data
+      healthcheck:
+        test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+      networks:
+        - internal
 
 volumes:
   postgres_data:
-# в основном коде поставил вместо localhost - postgres, чтобы он обращался к базе данных находящейся в docker-compose 
+  redis_data:

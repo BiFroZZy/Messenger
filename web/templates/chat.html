@@ -29,7 +29,7 @@
     <script>
         let reconnectAttempts = 0;
         let currentUsername = "";
-        const socket = new WebSocket("wss://genesis.cloudpub.ru:/ws"); // Использовал через админа в командлайне netsh advfirewall firewall add rule name="WebServer 8080" dir=in action=allow protocol=TCP localport=8080 
+        const socket = new WebSocket("wss://gen.cloudpub.ru:/ws"); // Использовал через админа в командлайне netsh advfirewall firewall add rule name="WebServer 8080" dir=in action=allow protocol=TCP localport=8080 
         const messagesContainer = document.getElementById("messages");
         const messageInput = document.getElementById("messageInput");
         const userStatus = document.getElementById("userStatus");

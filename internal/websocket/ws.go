@@ -46,7 +46,8 @@ func init(){
 	// address := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	password := os.Getenv("REDIS_PASSWORD")
 	redisClient = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		// Addr: "localhost:6379",
+		Addr: "redis:6379",
 		Password: password,
 		DB: 0,
 	})
