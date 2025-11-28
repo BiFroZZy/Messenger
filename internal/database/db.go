@@ -15,11 +15,11 @@ import (
 // Проверка на наличие базы данных, если ее нет, он ее создает
 func InitDB(){
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
-		os.Getenv("USER"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("HOST"),
-		os.Getenv("PORT"),
-		os.Getenv("DB"),
+		os.Getenv("POST_USER"),
+		os.Getenv("POST_PASSWORD"),
+		os.Getenv("POST_HOST"),
+		os.Getenv("POST_PORT"),
+		os.Getenv("POST_DB"),
 	)
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{
@@ -43,11 +43,11 @@ func RegPage(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/reg")
 	}
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", // Получаем переменные из среды окружения 
-		os.Getenv("USER"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("HOST"),
-		os.Getenv("PORT"),
-		os.Getenv("DB"),
+		os.Getenv("POST_USER"),
+		os.Getenv("POST_PASSWORD"),
+		os.Getenv("POST_HOST"),
+		os.Getenv("POST_PORT"),
+		os.Getenv("POST_DB"),
 	)
 	getUsernameReg := c.FormValue("usernameReg")
 	getPasswordReg := c.FormValue("passwordReg")
@@ -90,11 +90,11 @@ func AuthPage(c echo.Context) error{
         return c.Redirect(http.StatusFound, "/auth")
     }
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
-		os.Getenv("USER"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("HOST"),
-		os.Getenv("PORT"),
-		os.Getenv("DB"),
+		os.Getenv("POST_USER"),
+		os.Getenv("POST_PASSWORD"),
+		os.Getenv("POST_HOST"),
+		os.Getenv("POST_PORT"),
+		os.Getenv("POST_DB"),
 	)
 	getUsernameAuth := c.FormValue("username")
 	getPasswordAuth := c.FormValue("password")
@@ -141,11 +141,11 @@ func AuthPage(c echo.Context) error{
 // Запись информации о клиенте в базу данных
 func WriteSQL(username, password string) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
-		os.Getenv("USER"),
-		os.Getenv("PASSWORD"),
-		os.Getenv("HOST"),
-		os.Getenv("PORT"),
-		os.Getenv("DB"),
+		os.Getenv("POST_USER"),
+		os.Getenv("POST_PASSWORD"),
+		os.Getenv("POST_HOST"),
+		os.Getenv("POST_PORT"),
+		os.Getenv("POST_DB"),
 	)
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{

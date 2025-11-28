@@ -9,7 +9,7 @@ import (
 
 func main(){
 	if err := godotenv.Load(); err != nil{ // Проверка на подключение к файлу среды окружения .env
-		log.Println("Can't connect to .env file!")
+		log.Printf("Can't connect to .env file: %v", err)
 	}
 	database.InitDB() // Проверка на базу данных
 	handlers.HandleRequests() // Поддержка запросов
