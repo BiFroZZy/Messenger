@@ -2,6 +2,7 @@
 Данный проект представляет собой мессенджер с общим чатом, авторизацией и регистрацией через почту, написанный на языке программирования Go. В этом проекте использовались такие технологиии как базы данных SQL и NoSQL(Redis, PostgreSQL), WebSocket, работа с фреймвроком Echo, контейнеризация Docker, а также управление версиями с помощью Git. 
 
 ![Screenshot](https://github.com/BiFroZZy/Messenger/blob/main/web/static/photos/2025-11-29_23-07-54.png)
+
 ![Screenshot](https://github.com/BiFroZZy/Messenger/blob/main/web/static/photos/2025-11-29_23-11-31.png)
 
 # Как установить?
