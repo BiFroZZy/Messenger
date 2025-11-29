@@ -1,9 +1,7 @@
-# Messenger
-
+# О самом проекте
 Данный проект представляет собой мессенджер, написанный на языке программирования Go. В этом проекте использовались такие технологиии как базы данных SQL и NoSQL, а именно Redis, PostgreSQL, WebSocket, работа с фреймвроком Echo, контейнеризация Docker, а также управление версиями с помощью Git. 
 
-# Как установить
-
+# Как установить?
     1) Клонируйте репозиторий:
         git clone https://github.com/Epsyl-one111/Messenger.git
         
@@ -27,23 +25,25 @@
     Если у Вас установлен Docker на вашем ПК, то Вы можете запустить программу с помощью команды:
         docker-compose build
         docker-compose up -d 
+    Если захотите остановить, то напишите команду:
+        docker-compose down 
 
 # Структура проекта
     - cmd\app\main.go - 
-    - cmd\handlers\handlers.go
+    - cmd\handlers\handlers.go - хэндлеры рутов страниц, middleware и обьявление хоста
 
-    - internal\database\db.go
-    - internal\mail\mail.go
-    - internal\websocket\ws.go
+    - internal\database\db.go - работа с базой данных
+    - internal\mail\mail.go - отправка кода на почту / работа с почтой
+    - internal\websocket\ws.go - функции для поддерджки WebSocket соединения  
 
-    - web\handlers\pghandlers.go
-    - web\static
-    - web\templates
+    - web\handlers\pghandlers.go - хэндлеры страниц проекта
+    - web\static - CSS даанные (оформление страниц проекта)
+    - web\templates - HTML-файлы (страницы)
 
-    - docker-compose.yml - 
-    - Dockerfile
+    - docker-compose.yml - управление контейнерами docker
+    - Dockerfile - инструкция сборки контейнера
 
     - go.mod - библиотеки для работы с мессенджером
     - go.sum
 
-    - .env
+    - .env - секреты
