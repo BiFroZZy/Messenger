@@ -88,11 +88,11 @@ func HandleRequests(){
 	e.GET("/reg", handlers.ShowRegPage)
 	e.POST("/reg/post", database.RegPage)
 
-	e.GET("/entermail", handlers.ShowEnterMail)
-	e.POST("/entermail/post", mail.SendWithGomail)
+	e.GET("/mails", handlers.ShowEnterMail)
+	e.POST("/mails/post", mail.SendWithGomail)
 
-	e.GET("/checkingcode", handlers.ShowCheckCode)
-	e.POST("/checkingcode/post", mail.CheckCode)
+	e.GET("/codes", handlers.ShowCheckCode)
+	e.POST("/codes/post", mail.CheckCode)
 	
 	e.GET("/ws", func(c echo.Context) error {
 		websocket.HandleConnections(c)

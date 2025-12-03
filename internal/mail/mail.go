@@ -14,7 +14,7 @@ import (
 
 func SendWithGomail(c echo.Context) error {
 	if c.Request().Method != http.MethodPost{
-		return c.Redirect(http.StatusFound, "/checkingcode")
+		return c.Redirect(http.StatusFound, "/codes")
 	}
 	if err := godotenv.Load(); err != nil{
 		fmt.Print("Can't find .env file")
