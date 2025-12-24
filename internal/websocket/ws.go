@@ -1,5 +1,4 @@
 package websocket
-
 import (
 	"context"
 	"encoding/json"
@@ -8,12 +7,10 @@ import (
 	"os"
 	"sync"
 	"time"
-
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
-
 // Определение структуры сообщения
 type Message struct{ 
 	Username string `json:"username"`
@@ -26,7 +23,6 @@ type Client struct {
 	send chan Message
 	stopPing chan bool
 }
-
 var (
 	upgrader = websocket.Upgrader{
 	ReadBufferSize: 1024,
@@ -39,14 +35,12 @@ var (
 	broadcast  = make(chan Message, 100) // Общий канал 
 
 	redisClient *redis.Client
-	maxMessages int64 = 250 // Максимальное количество сообщений, которое можно сохранить в Redis 
+	maxMessages int64 = 250 // Максимальное количество сообщений, которое можно сохранить в redis 
 )
 // Инициальзация Redis через переменные окружения 
 func init(){
-	// address := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	password := os.Getenv("REDIS_PASSWORD")
 	redisClient = redis.NewClient(&redis.Options{
-		// Addr: "localhost:6379",
 		Addr: "redis:6379",
 		Password: password,
 		DB: 0,
@@ -60,12 +54,11 @@ func init(){
 }
 // Сохранение сообщений в Redis
 func SaveMessages(msg Message){
-	// Сначала преобразуем сообщение в JSON
-	msgJSON, err := json.Marshal(msg) 
+	msgJSON, err := json.Marshal(msg) // Сначала преобразуем сообщение в json
 	if err != nil{
 		log.Printf("Невозможно переписать в JSON сообщение: %v", err)
 	}
-	// Затем закидываем сериализованнное сообщение в Redis
+	// Затем закидываем сериализованнное сообщение в redis
 	if err := redisClient.LPush(context.Background(), os.Getenv("REDIS_KEY"), msgJSON).Err(); err != nil{
 		log.Printf("Невозможно записать данные в Redis :%v", err)
 	}
@@ -74,7 +67,6 @@ func SaveMessages(msg Message){
 		log.Printf("Невозможно разделить сообщения: %v", err)
 	}
 }
-
 func SendHistory(ws *websocket.Conn){
 	messages, err := redisClient.LRange(context.Background(), os.Getenv("REDIS_KEY"), 0, maxMessages-1).Result()
 	if err != nil{
@@ -93,7 +85,6 @@ func SendHistory(ws *websocket.Conn){
 		}
 	}
 }
-
 // Функция, сохраняющая историю чата
 func GetHistory(c echo.Context){
 	messages, err := redisClient.LRange(context.Background(), os.Getenv("REDIS_KEY"), 0, maxMessages-1).Result()
@@ -109,12 +100,9 @@ func GetHistory(c echo.Context){
 		}
 		res = append(res, msg)
 	} 
-
 	c.Response().Header().Set("Content-Type", "application/json")
 	json.NewEncoder(c.Response()).Encode(res)
 }
-
-
 func HandleConnections(c echo.Context) error {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
@@ -122,7 +110,6 @@ func HandleConnections(c echo.Context) error {
 		return nil
 	}
 	defer ws.Close()
-
 	ws.SetReadDeadline(time.Now().Add(180 * time.Second)) 
     ws.SetPongHandler(func(string) error { 
         ws.SetReadDeadline(time.Now().Add(180 * time.Second)) 
@@ -138,7 +125,6 @@ func HandleConnections(c echo.Context) error {
 	RegisterClient(client) // Регистрируем клиента
 	defer UnregisterClient(client) // Удаляем клиента при отключении
 	SendHistory(ws)
-
 // Читаем сообщения от клиента
 	for { 
 		var msg Message
@@ -157,7 +143,6 @@ func HandleConnections(c echo.Context) error {
 	}
 	return nil
 }
-
 func PingClient(client *Client){
 	ticker := time.NewTicker(30 * time.Second) 
     defer ticker.Stop()

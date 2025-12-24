@@ -1,10 +1,8 @@
 package handlers
-
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
-
 // Домашняя страница
 func HomePage(c echo.Context) error{ 
 	return c.Render(http.StatusOK, "home", map[string]interface{}{

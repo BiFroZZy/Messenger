@@ -1,14 +1,11 @@
 package database
-
 import (
 	"os"
 	"time"
 	"log"
 	"net/http"
 	"context"
-	_"strconv"
 	"fmt"
-
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -61,22 +58,12 @@ func RegPage(c echo.Context) error {
 		})
 	}
 	defer conn.Close(context.Background())
-
 	rows, err := conn.Query(context.Background(), "SELECT username, password FROM data_user")
-	if err != nil{
-		log.Fatal(err)
-	}
+	if err != nil{log.Fatal(err)}
 	defer rows.Close()
-	var (
-		username string
-		password string
-	)
+	var username, password string
 	for rows.Next(){
-		err := rows.Scan(&username, &password)
-		if err != nil{
-			log.Fatal(err)
-		}
-		
+		if err := rows.Scan(&username, &password); err != nil{log.Fatal(err)}
 		if getUsernameReg == username || getPasswordReg == password{
 			data := struct{Error string}{Error: "Password or login already exists"}
 			return c.Render(http.StatusOK, "registration", data)
@@ -98,7 +85,6 @@ func AuthPage(c echo.Context) error{
 	)
 	getUsernameAuth := c.FormValue("username")
 	getPasswordAuth := c.FormValue("password")
-
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{
 		log.Printf("Error: %v",err)
@@ -108,22 +94,14 @@ func AuthPage(c echo.Context) error{
 		})
 	}
 	defer conn.Close(context.Background())
-	
 	rows, err := conn.Query(context.Background(), "SELECT username, password FROM data_user")
 	if err != nil{
 		log.Fatal(err)
 	}
 	defer rows.Close()
-
-	var (
-		username string
-		password string
-	)
-	
+	var username, password string
 	for rows.Next(){
-		err := rows.Scan(&username, &password)
-		if err != nil{
-			return c.Render(http.StatusOK, "authorization", map[string]interface{}{
+		if err := rows.Scan(&username, &password); err != nil{return c.Render(http.StatusOK, "authorization", map[string]interface{}{
 				"Title": "Authorization",
         		"Error": "Wrong password or login",
 			})
@@ -137,7 +115,6 @@ func AuthPage(c echo.Context) error{
 		"Error": "Wrong password or login",
 	})
 }
-
 // Запись информации о клиенте в базу данных
 func WriteSQL(username, password string) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
@@ -152,7 +129,6 @@ func WriteSQL(username, password string) {
 		log.Fatal(err)
 	}
 	defer conn.Close(context.Background())
-
 	_, err = conn.Exec(context.Background(), "INSERT INTO data_user (username, password) VALUES ($1, $2)", username, password) 
 	if err != nil{
 		log.Fatal(err)
