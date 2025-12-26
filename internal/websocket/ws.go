@@ -1,4 +1,5 @@
 package websocket
+
 import (
 	"context"
 	"encoding/json"
@@ -7,6 +8,7 @@ import (
 	"os"
 	"sync"
 	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"

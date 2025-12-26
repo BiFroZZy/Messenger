@@ -1,7 +1,9 @@
 package handlers
+
 import (
-	"github.com/labstack/echo/v4"
 	"net/http"
+	
+	"github.com/labstack/echo/v4"
 )
 // Домашняя страница
 func HomePage(c echo.Context) error{ 

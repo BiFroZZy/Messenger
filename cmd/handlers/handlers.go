@@ -1,24 +1,30 @@
 package handlers
+
 import (
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
 	"Messanger/internal/database"
 	"Messanger/internal/mail"
 	"Messanger/internal/websocket"
 	"Messanger/web/handlers"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
+
 type Template struct{
 	templates *template.Template // Структура для шаблонов
 }
+
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error{
 	return t.templates.ExecuteTemplate(w, name, data) // Метод для рендера шаблонов 
 }
+
 func MiddlewareSessions(next echo.HandlerFunc) echo.HandlerFunc{ // Создаем Middleware для сессии
 	return func(c echo.Context) error{
 		var store = sessions.NewCookieStore([]byte(os.Getenv("SECRET_KEY")))

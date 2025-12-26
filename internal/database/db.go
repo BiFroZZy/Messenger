@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -28,9 +29,16 @@ type Person struct{
 
 // Проверка на наличие базы данных, если ее нет, он ее создает
 func InitDB(){
+	connStr = fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
+		os.Getenv("POST_USER"),
+		os.Getenv("POST_PASSWORD"),
+		os.Getenv("POST_HOST"),
+		os.Getenv("POST_PORT"),
+		os.Getenv("POST_DB"),
+	)
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{
-		log.Fatalf("%v",err)
+		log.Fatalf("Ошибка подключения к базе данных initDB: %v",err)
 	}
 	_, err = conn.Exec(context.Background(), `
         CREATE TABLE IF NOT EXISTS data_user (
@@ -40,9 +48,11 @@ func InitDB(){
         )
     `)
 	if err != nil{
-		time.Sleep(2 * time.Second)
-		InitDB() // Рекурсия на проверку 
-		return
+		for i := 0; i < 5; i++{
+			time.Sleep(2 * time.Second)
+			InitDB() // Рекурсия на проверку 
+			return
+		}
 	}
 }
 func RegPage(c echo.Context) error { 	
@@ -62,11 +72,15 @@ func RegPage(c echo.Context) error {
 	}
 	defer conn.Close(context.Background())
 	rows, err := conn.Query(context.Background(), "SELECT username, password FROM data_user")
-	if err != nil{log.Fatal(err)}
+	if err != nil{
+		log.Fatalf("Не могу счесть данные с базы в странице регистарции: %v", err)
+	}
 	defer rows.Close()
 
 	for rows.Next(){
-		if err := rows.Scan(&person.Username, &person.Password); err != nil{log.Fatal(err)}
+		if err := rows.Scan(&person.Username, &person.Password); err != nil{
+			log.Fatalf("Не могу получить данные с базы: %v", err)
+		}
 		if getUsernameReg == person.Username || getPasswordReg == person.Password{
 			data := struct{Error string}{Error: "Password or login already exists"}
 			return c.Render(http.StatusOK, "registration", data)
@@ -92,7 +106,7 @@ func AuthPage(c echo.Context) error{
 	defer conn.Close(context.Background())
 	rows, err := conn.Query(context.Background(), "SELECT username, password FROM data_user")
 	if err != nil{
-		log.Fatal(err)
+		log.Fatalf("Не могу счесть данные с базы в странице авторизации: %v", err)
 	}
 	defer rows.Close()
 
@@ -116,11 +130,12 @@ func AuthPage(c echo.Context) error{
 func WriteSQL(username, password string) {
 	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil{
-		log.Fatal(err)
+		log.Fatalf("Не могу подключиться к базе данных для записи данных: %v",err)
 	}
 	defer conn.Close(context.Background())
+
 	_, err = conn.Exec(context.Background(), "INSERT INTO data_user (username, password) VALUES ($1, $2)", username, password) 
 	if err != nil{
-		log.Fatal(err)
+		log.Fatalf("Ошибка! Не могу занести данные в базу: %v", err)
 	}
 }
