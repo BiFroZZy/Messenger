@@ -99,6 +99,7 @@ func AuthPage(c echo.Context) error{
 		log.Fatal(err)
 	}
 	defer rows.Close()
+	
 	var username, password string
 	for rows.Next(){
 		if err := rows.Scan(&username, &password); err != nil{return c.Render(http.StatusOK, "authorization", map[string]interface{}{
@@ -116,6 +117,7 @@ func AuthPage(c echo.Context) error{
 	})
 }
 // Запись информации о клиенте в базу данных
+// через енвишку для сохранности данных
 func WriteSQL(username, password string) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", 
 		os.Getenv("POST_USER"),
@@ -132,6 +134,5 @@ func WriteSQL(username, password string) {
 	_, err = conn.Exec(context.Background(), "INSERT INTO data_user (username, password) VALUES ($1, $2)", username, password) 
 	if err != nil{
 		log.Fatal(err)
-
 	}
 }
